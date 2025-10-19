@@ -9,9 +9,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Простой счётчик">
     
-    <!-- Манифест -->
-    <link rel="manifest" href="/simple-counter/manifest.json">
-    <link rel="apple-touch-icon" href="/simple-counter/icon.png">
+    <!-- Манифест с правильным путем -->
+    <link rel="manifest" href="/sim/manifest.json">
+    
+    <!-- Иконки с правильным путем -->
+    <link rel="apple-touch-icon" href="/sim/icon.png">
+    
+    <!-- Загрузочный экран -->
+    <link rel="apple-touch-startup-image" href="/sim/icon.png">
     
     <title>Простой счётчик</title>
     
@@ -58,6 +63,7 @@
             color: #667eea;
             margin: 30px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.15s ease;
         }
         
         .buttons {
@@ -98,6 +104,13 @@
             font-size: 14px;
             line-height: 1.4;
         }
+        
+        .url-info {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #888;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -111,11 +124,16 @@
         <div class="instructions">
             💡 Добавьте на главный экран для полноэкранного режима
         </div>
+        <div class="url-info" id="urlInfo"></div>
     </div>
 
     <script>
         let count = 0;
         const counterElement = document.getElementById('counter');
+        const urlInfoElement = document.getElementById('urlInfo');
+        
+        // Показываем текущий URL для отладки
+        urlInfoElement.textContent = window.location.href;
         
         function changeCounter(value) {
             count += value;
@@ -130,6 +148,11 @@
         
         // Обработка касаний для лучшей работы на мобильных
         document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Проверяем, правильно ли мы загружены
+        if (!window.location.href.includes('/sim/')) {
+            console.warn('Возможно неправильный URL для PWA');
+        }
     </script>
 </body>
 </html>

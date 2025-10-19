@@ -4,18 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     
-    <!-- iOS мета-теги для полноэкранного режима -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Space Defender">
+    <meta name="apple-mobile-web-app-title" content="Weed Tycoon">
     
-    <!-- Манифест с правильным путем -->
     <link rel="manifest" href="/sim/manifest.json">
-    
-    <!-- Иконки с правильным путем -->
     <link rel="apple-touch-icon" href="/sim/icon.png">
     
-    <title>Space Defender</title>
+    <title>Weed Tycoon</title>
     
     <style>
         * {
@@ -30,615 +26,628 @@
             height: 100%;
             overflow: hidden;
             position: fixed;
-            background: #000;
+            background: #1a1a1a;
         }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(180deg, #0c1445 0%, #000000 100%);
+            background: linear-gradient(135deg, #0a3d0a 0%, #1a1a1a 100%);
             color: white;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
             overflow: hidden;
-            touch-action: none;
         }
 
-        .game-header {
+        .header {
+            background: rgba(0, 50, 0, 0.9);
+            padding: 15px;
+            border-bottom: 2px solid #4CAF50;
             text-align: center;
-            z-index: 10;
         }
 
         .game-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
-            color: #4fc3f7;
-            text-shadow: 0 0 10px #4fc3f7;
+            color: #4CAF50;
             margin-bottom: 10px;
         }
 
         .stats {
             display: flex;
             justify-content: space-around;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .stat {
             text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 10px;
+            min-width: 80px;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            color: #4caf50;
+            color: #4CAF50;
         }
 
         .stat-label {
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: rgba(0, 30, 0, 0.8);
+            padding: 15px;
+            border-right: 1px solid #4CAF50;
+            overflow-y: auto;
+        }
+
+        .tab-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            padding: 12px;
+            background: #2E7D32;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+
+        .tab-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grow-room {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .plant-slot {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .plant-slot:hover {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .plant-slot.empty::before {
+            content: "+";
+            font-size: 48px;
+            color: #4CAF50;
+        }
+
+        .plant {
+            width: 100%;
+            text-align: center;
+        }
+
+        .plant-stage {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .plant-info {
             font-size: 12px;
             color: #ccc;
         }
 
-        .high-score {
-            color: #ffeb3b !important;
-            text-shadow: 0 0 5px #ffeb3b;
-        }
-
-        .game-area {
-            flex: 1;
-            position: relative;
-            margin: 20px 0;
-            border: 2px solid #4fc3f7;
-            border-radius: 15px;
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            margin: 5px 0;
             overflow: hidden;
-            background: radial-gradient(circle at center, #1a237e 0%, #000000 70%);
         }
 
-        .planet {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle at 30% 30%, #4caf50, #1b5e20);
-            border-radius: 50%;
-            box-shadow: 0 0 20px #4caf50;
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s;
         }
 
-        .asteroid {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: radial-gradient(circle at 30% 30%, #795548, #3e2723);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .asteroid:active {
-            transform: scale(1.2);
-        }
-
-        .explosion {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, #ff9800, #ff5722);
-            border-radius: 50%;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .controls {
+        .action-buttons {
             display: flex;
-            gap: 15px;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
             justify-content: center;
-            z-index: 10;
+        }
+
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 10px;
+            background: #FF9800;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .action-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .market-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .market-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .item-price {
+            color: #FFD700;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .upgrade-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #2196F3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
         }
 
         button {
-            padding: 15px 25px;
-            font-size: 18px;
+            padding: 10px 15px;
+            background: #4CAF50;
             border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            background: linear-gradient(45deg, #4fc3f7, #01579b);
+            border-radius: 6px;
             color: white;
-            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
         }
 
-        button:active {
-            transform: scale(0.95);
+        button:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
         }
 
         button:disabled {
             background: #666;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .secondary-btn {
-            background: linear-gradient(45deg, #ff9800, #e65100);
-            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
-        }
-
-        .game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .game-over h2 {
-            font-size: 36px;
-            color: #f44336;
-            margin-bottom: 20px;
-        }
-
-        .final-score {
-            font-size: 24px;
-            color: #4caf50;
-            margin-bottom: 10px;
-        }
-
-        .high-score-achieved {
-            color: #ffeb3b;
-            font-size: 20px;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px #ffeb3b;
-            display: none;
-        }
-
-        .instructions {
-            text-align: center;
-            color: #ccc;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .save-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(76, 175, 80, 0.9);
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 50;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s;
         }
 
-        /* Анимации */
-        @keyframes explode {
-            0% { transform: scale(0); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.7; }
-            100% { transform: scale(2); opacity: 0; }
+        .notification.show {
+            transform: translateX(0);
         }
 
-        @keyframes float {
-            0% { transform: translateY(-10px) rotate(0deg); }
-            50% { transform: translateY(10px) rotate(180deg); }
-            100% { transform: translateY(-10px) rotate(360deg); }
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .inventory-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
         }
 
-        .floating {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .pulse {
-            animation: pulse 0.5s ease-in-out;
+        .quantity {
+            color: #FFD700;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="save-indicator" id="saveIndicator">Сохранено</div>
-
-    <div class="game-header">
-        <div class="game-title">🚀 SPACE DEFENDER</div>
+    <div class="header">
+        <div class="game-title">🌿 WEED TYCOON</div>
         <div class="stats">
             <div class="stat">
-                <div class="stat-value" id="score">0</div>
-                <div class="stat-label">ОЧКИ</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="lives">3</div>
-                <div class="stat-label">ЖИЗНИ</div>
+                <div class="stat-value" id="money">$100</div>
+                <div class="stat-label">БАЛАНС</div>
             </div>
             <div class="stat">
                 <div class="stat-value" id="level">1</div>
                 <div class="stat-label">УРОВЕНЬ</div>
             </div>
             <div class="stat">
-                <div class="stat-value high-score" id="highScore">0</div>
-                <div class="stat-label">РЕКОРД</div>
+                <div class="stat-value" id="xp">0/100</div>
+                <div class="stat-label">ОПЫТ</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="reputation">0%</div>
+                <div class="stat-label">РЕПУТАЦИЯ</div>
             </div>
         </div>
     </div>
 
-    <div class="game-area" id="gameArea">
-        <div class="planet floating"></div>
-        <!-- Астероиды будут добавляться здесь -->
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('grow')">🌱 Выращивание</button>
+                <button class="tab-btn" onclick="switchTab('process')">🔪 Переработка</button>
+                <button class="tab-btn" onclick="switchTab('sell')">💰 Продажи</button>
+                <button class="tab-btn" onclick="switchTab('inventory')">🎒 Инвентарь</button>
+                <button class="tab-btn" onclick="switchTab('upgrades')">⚡ Улучшения</button>
+                <button class="tab-btn" onclick="switchTab('stats')">📊 Статистика</button>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Выращивание -->
+            <div id="grow" class="tab-content active">
+                <h2>Теплица</h2>
+                <div class="grow-room" id="growRoom">
+                    <!-- Слоты для растений будут добавляться здесь -->
+                </div>
+                <button onclick="buySeed()" id="buySeedBtn">Купить семечко ($50)</button>
+            </div>
+
+            <!-- Переработка -->
+            <div id="process" class="tab-content">
+                <h2>Переработка урожая</h2>
+                <div id="processContent">
+                    <p>Здесь вы можете перерабатывать собранный урожай</p>
+                    <!-- Контент переработки -->
+                </div>
+            </div>
+
+            <!-- Продажи -->
+            <div id="sell" class="tab-content">
+                <h2>Торговля</h2>
+                <div class="market-items" id="marketItems">
+                    <!-- Предложения покупателей -->
+                </div>
+            </div>
+
+            <!-- Инвентарь -->
+            <div id="inventory" class="tab-content">
+                <h2>Инвентарь</h2>
+                <div class="inventory-grid" id="inventoryGrid">
+                    <!-- Предметы инвентаря -->
+                </div>
+            </div>
+
+            <!-- Улучшения -->
+            <div id="upgrades" class="tab-content">
+                <h2>Улучшения</h2>
+                <div id="upgradesList">
+                    <!-- Список улучшений -->
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div id="stats" class="tab-content">
+                <h2>Статистика</h2>
+                <div id="statsContent">
+                    <!-- Статистика игры -->
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="controls">
-        <button onclick="startGame()" id="startBtn">СТАРТ</button>
-        <button onclick="pauseGame()" id="pauseBtn" disabled>ПАУЗА</button>
-        <button onclick="resetProgress()" class="secondary-btn">СБРОС</button>
-    </div>
-
-    <div class="instructions">
-        💥 Нажимайте на астероиды, чтобы защитить планету!
-    </div>
-
-    <div class="game-over" id="gameOver">
-        <h2>💀 GAME OVER</h2>
-        <div class="final-score" id="finalScore">Очки: 0</div>
-        <div class="high-score-achieved" id="highScoreAchieved">🎉 НОВЫЙ РЕКОРД!</div>
-        <button onclick="startGame()">ИГРАТЬ СНОВА</button>
-    </div>
+    <div class="notification" id="notification"></div>
 
     <script>
-        // Игровые переменные
-        let score = 0;
-        let lives = 3;
-        let level = 1;
-        let gameSpeed = 1500;
-        let gameActive = false;
-        let asteroidInterval;
-        let asteroids = [];
-        let highScore = 0;
-        let gameState = {};
-        let autoSaveInterval;
-
-        // Элементы DOM
-        const scoreElement = document.getElementById('score');
-        const livesElement = document.getElementById('lives');
-        const levelElement = document.getElementById('level');
-        const highScoreElement = document.getElementById('highScore');
-        const gameArea = document.getElementById('gameArea');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const gameOverScreen = document.getElementById('gameOver');
-        const finalScoreElement = document.getElementById('finalScore');
-        const highScoreAchieved = document.getElementById('highScoreAchieved');
-        const saveIndicator = document.getElementById('saveIndicator');
-
-        // Система сохранения
-        const STORAGE_KEYS = {
-            HIGH_SCORE: 'spaceDefender_highScore',
-            GAME_STATE: 'spaceDefender_gameState',
-            SETTINGS: 'spaceDefender_settings'
+        // Игровые данные
+        const gameState = {
+            money: 100,
+            level: 1,
+            xp: 0,
+            reputation: 0,
+            inventory: {
+                seeds: 0,
+                buds: 0,
+                trimmed: 0,
+                packaged: 0
+            },
+            plants: [],
+            upgrades: {},
+            stats: {
+                totalHarvests: 0,
+                totalSales: 0,
+                moneyEarned: 0
+            }
         };
 
-        // Загрузка сохраненных данных при запуске
-        function loadSavedData() {
-            try {
-                // Загрузка рекорда
-                const savedHighScore = localStorage.getItem(STORAGE_KEYS.HIGH_SCORE);
-                if (savedHighScore) {
-                    highScore = parseInt(savedHighScore);
-                    highScoreElement.textContent = highScore;
-                }
+        // Стадии роста растения
+        const PLANT_STAGES = [
+            { name: "Семечко", emoji: "🌱", time: 10, value: 0 },
+            { name: "Росток", emoji: "🪴", time: 30, value: 10 },
+            { name: "Саженец", emoji: "🌿", time: 60, value: 25 },
+            { name: "Взрослое", emoji: "🌳", time: 120, value: 50 },
+            { name: "Цветение", emoji: "💮", time: 180, value: 100 }
+        ];
 
-                // Загрузка состояния игры (для продолжения)
-                const savedGameState = localStorage.getItem(STORAGE_KEYS.GAME_STATE);
-                if (savedGameState) {
-                    gameState = JSON.parse(savedGameState);
-                    console.log('Загружено сохраненное состояние:', gameState);
-                }
-
-                showSaveIndicator('Данные загружены');
-            } catch (error) {
-                console.error('Ошибка загрузки данных:', error);
-            }
+        // Инициализация игры
+        function initGame() {
+            loadGame();
+            updateUI();
+            renderGrowRoom();
+            startGameLoop();
         }
 
-        // Сохранение рекорда
-        function saveHighScore() {
-            try {
-                localStorage.setItem(STORAGE_KEYS.HIGH_SCORE, highScore.toString());
-            } catch (error) {
-                console.error('Ошибка сохранения рекорда:', error);
-            }
+        // Игровой цикл
+        function startGameLoop() {
+            setInterval(() => {
+                updatePlants();
+                saveGame();
+            }, 1000);
         }
 
-        // Авто-сохранение состояния игры
-        function saveGameState() {
-            if (!gameActive) return;
-
-            try {
-                const stateToSave = {
-                    score: score,
-                    lives: lives,
-                    level: level,
-                    gameSpeed: gameSpeed,
-                    timestamp: Date.now()
-                };
-                
-                localStorage.setItem(STORAGE_KEYS.GAME_STATE, JSON.stringify(stateToSave));
-                showSaveIndicator('Игра сохранена');
-            } catch (error) {
-                console.error('Ошибка сохранения игры:', error);
-            }
-        }
-
-        // Продолжение сохраненной игры
-        function continueGame() {
-            if (gameState && gameState.score > 0) {
-                if (confirm('Найдено сохранение игры. Продолжить?')) {
-                    score = gameState.score;
-                    lives = gameState.lives;
-                    level = gameState.level;
-                    gameSpeed = gameState.gameSpeed;
+        // Обновление растений
+        function updatePlants() {
+            let hasChanges = false;
+            
+            gameState.plants.forEach(plant => {
+                if (plant.stage < PLANT_STAGES.length - 1) {
+                    plant.progress++;
                     
-                    updateUI();
-                    startGame();
-                }
-            }
-        }
-
-        // Очистка сохраненного состояния
-        function clearGameState() {
-            try {
-                localStorage.removeItem(STORAGE_KEYS.GAME_STATE);
-                gameState = {};
-            } catch (error) {
-                console.error('Ошибка очистки состояния:', error);
-            }
-        }
-
-        // Показать индикатор сохранения
-        function showSaveIndicator(message) {
-            saveIndicator.textContent = message;
-            saveIndicator.style.opacity = '1';
-            setTimeout(() => {
-                saveIndicator.style.opacity = '0';
-            }, 2000);
-        }
-
-        // Сброс всего прогресса
-        function resetProgress() {
-            if (confirm('Вы уверены? Это сбросит весь ваш прогресс и рекорды!')) {
-                try {
-                    localStorage.removeItem(STORAGE_KEYS.HIGH_SCORE);
-                    localStorage.removeItem(STORAGE_KEYS.GAME_STATE);
-                    highScore = 0;
-                    gameState = {};
-                    highScoreElement.textContent = '0';
-                    showSaveIndicator('Прогресс сброшен');
-                    
-                    if (!gameActive) {
-                        resetGame();
+                    if (plant.progress >= PLANT_STAGES[plant.stage].time) {
+                        plant.stage++;
+                        plant.progress = 0;
+                        showNotification(`🌱 Растение выросло до стадии: ${PLANT_STAGES[plant.stage].name}`);
+                        hasChanges = true;
                     }
-                } catch (error) {
-                    console.error('Ошибка сброса прогресса:', error);
                 }
+            });
+            
+            if (hasChanges) {
+                renderGrowRoom();
+                updateUI();
             }
         }
 
-        function startGame() {
-            resetGame();
-            gameActive = true;
-            startBtn.disabled = true;
-            pauseBtn.disabled = false;
-            gameOverScreen.style.display = 'none';
-            highScoreAchieved.style.display = 'none';
-            
-            // Запуск генерации астероидов
-            asteroidInterval = setInterval(createAsteroid, gameSpeed);
-            
-            // Запуск авто-сохранения
-            autoSaveInterval = setInterval(saveGameState, 10000); // Сохранять каждые 10 секунд
-            
-            showSaveIndicator('Игра начата!');
-        }
-
-        function pauseGame() {
-            gameActive = !gameActive;
-            pauseBtn.textContent = gameActive ? 'ПАУЗА' : 'ПРОДОЛЖИТЬ';
-            
-            if (!gameActive) {
-                clearInterval(asteroidInterval);
-                saveGameState(); // Сохранить при паузе
+        // Покупка семечка
+        function buySeed() {
+            if (gameState.money >= 50) {
+                gameState.money -= 50;
+                gameState.inventory.seeds++;
+                updateUI();
+                showNotification("🌱 Куплено семечко");
             } else {
-                asteroidInterval = setInterval(createAsteroid, gameSpeed);
+                showNotification("❌ Недостаточно денег");
             }
         }
 
-        function resetGame() {
-            score = 0;
-            lives = 3;
-            level = 1;
-            gameSpeed = 1500;
-            updateUI();
-            
-            // Удалить все астероиды
-            asteroids.forEach(asteroid => asteroid.remove());
-            asteroids = [];
-            
-            clearInterval(asteroidInterval);
-            clearInterval(autoSaveInterval);
+        // Посадка растения
+        function plantSeed(slotIndex) {
+            if (gameState.inventory.seeds > 0 && !gameState.plants[slotIndex]) {
+                gameState.inventory.seeds--;
+                gameState.plants[slotIndex] = {
+                    stage: 0,
+                    progress: 0,
+                    health: 100,
+                    quality: 1.0
+                };
+                renderGrowRoom();
+                updateUI();
+                showNotification("🌱 Семечко посажено");
+            }
         }
 
-        function createAsteroid() {
-            if (!gameActive) return;
+        // Сбор урожая
+        function harvestPlant(slotIndex) {
+            const plant = gameState.plants[slotIndex];
+            if (plant && plant.stage === PLANT_STAGES.length - 1) {
+                const value = PLANT_STAGES[plant.stage].value * plant.quality;
+                gameState.inventory.buds += Math.floor(value);
+                gameState.plants[slotIndex] = null;
+                gameState.stats.totalHarvests++;
+                addXP(10);
+                
+                renderGrowRoom();
+                updateUI();
+                showNotification(`💰 Собран урожай: ${Math.floor(value)}г`);
+            }
+        }
 
-            const asteroid = document.createElement('div');
-            asteroid.className = 'asteroid';
+        // Добавление опыта
+        function addXP(amount) {
+            gameState.xp += amount;
+            const xpNeeded = gameState.level * 100;
             
-            const maxX = gameArea.offsetWidth - 30;
-            const x = Math.random() * maxX;
+            if (gameState.xp >= xpNeeded) {
+                gameState.level++;
+                gameState.xp = 0;
+                showNotification(`🎉 Новый уровень: ${gameState.level}!`);
+            }
+            updateUI();
+        }
+
+        // Рендер теплицы
+        function renderGrowRoom() {
+            const growRoom = document.getElementById('growRoom');
+            growRoom.innerHTML = '';
             
-            asteroid.style.left = x + 'px';
-            asteroid.style.top = '-30px';
-            
-            const size = 20 + Math.random() * 30;
-            asteroid.style.width = size + 'px';
-            asteroid.style.height = size + 'px';
-            
-            asteroid.addEventListener('click', destroyAsteroid);
-            
-            gameArea.appendChild(asteroid);
-            asteroids.push(asteroid);
-            
-            let position = -30;
-            const fallInterval = setInterval(() => {
-                if (!gameActive) {
-                    clearInterval(fallInterval);
-                    return;
+            // Создаем 6 слотов для растений
+            for (let i = 0; i < 6; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'plant-slot';
+                slot.onclick = () => handleSlotClick(i);
+                
+                const plant = gameState.plants[i];
+                
+                if (plant) {
+                    const stage = PLANT_STAGES[plant.stage];
+                    const progressPercent = (plant.progress / stage.time) * 100;
+                    
+                    slot.innerHTML = `
+                        <div class="plant">
+                            <div class="plant-stage">${stage.emoji}</div>
+                            <div class="plant-info">${stage.name}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                            </div>
+                            <div class="plant-info">Здоровье: ${plant.health}%</div>
+                            <div class="action-buttons">
+                                ${plant.stage === PLANT_STAGES.length - 1 ? 
+                                    '<button class="action-btn" onclick="event.stopPropagation(); harvestPlant(' + i + ')">Собрать</button>' : 
+                                    '<button class="action-btn" onclick="event.stopPropagation(); waterPlant(' + i + ')" disabled>Полить</button>'
+                                }
+                            </div>
+                        </div>
+                    `;
+                    slot.classList.remove('empty');
+                } else {
+                    slot.classList.add('empty');
+                    slot.innerHTML = '<div class="plant-info">Пустой слот</div>';
                 }
                 
-                position += 2 + level * 0.5;
-                asteroid.style.top = position + 'px';
-                
-                if (position > gameArea.offsetHeight - 110) {
-                    clearInterval(fallInterval);
-                    asteroid.remove();
-                    asteroids = asteroids.filter(a => a !== asteroid);
-                    loseLife();
-                }
-            }, 20);
-        }
-
-        function destroyAsteroid(event) {
-            if (!gameActive) return;
-            
-            const asteroid = event.target;
-            const rect = asteroid.getBoundingClientRect();
-            
-            createExplosion(rect.left + rect.width/2, rect.top + rect.height/2);
-            
-            asteroid.remove();
-            asteroids = asteroids.filter(a => a !== asteroid);
-            
-            score += 10 * level;
-            updateUI();
-            
-            // Авто-сохранение при значительном изменении счета
-            if (score % 50 === 0) {
-                saveGameState();
-            }
-            
-            if (score >= level * 100) {
-                levelUp();
+                growRoom.appendChild(slot);
             }
         }
 
-        function createExplosion(x, y) {
-            const explosion = document.createElement('div');
-            explosion.className = 'explosion';
-            explosion.style.left = (x - 25) + 'px';
-            explosion.style.top = (y - 25) + 'px';
-            
-            gameArea.appendChild(explosion);
-            
-            explosion.style.animation = 'explode 0.5s forwards';
-            setTimeout(() => explosion.remove(), 500);
-        }
-
-        function loseLife() {
-            lives--;
-            updateUI();
-            
-            // Сохранить при потере жизни
-            saveGameState();
-            
-            if (lives <= 0) {
-                endGame();
+        // Обработчик клика по слоту
+        function handleSlotClick(slotIndex) {
+            if (!gameState.plants[slotIndex] && gameState.inventory.seeds > 0) {
+                plantSeed(slotIndex);
             }
         }
 
-        function levelUp() {
-            level++;
-            gameSpeed = Math.max(300, gameSpeed - 100);
-            updateUI();
-            
-            levelElement.classList.add('pulse');
-            setTimeout(() => levelElement.classList.remove('pulse'), 500);
-            
-            // Сохранить при переходе на новый уровень
-            saveGameState();
+        // Полив растения (заглушка для будущей реализации)
+        function waterPlant(slotIndex) {
+            showNotification("💧 Растение полито");
         }
 
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Скрыть все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Убрать активный класс у всех кнопок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показать выбранную вкладку
+            document.getElementById(tabName).classList.add('active');
+            
+            // Активировать кнопку
+            event.target.classList.add('active');
+        }
+
+        // Показать уведомление
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Обновление интерфейса
         function updateUI() {
-            scoreElement.textContent = score;
-            livesElement.textContent = lives;
-            levelElement.textContent = level;
-            highScoreElement.textContent = highScore;
+            document.getElementById('money').textContent = `$${gameState.money}`;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('xp').textContent = `${gameState.xp}/${gameState.level * 100}`;
+            document.getElementById('reputation').textContent = `${gameState.reputation}%`;
             
-            if (lives === 1) {
-                livesElement.style.color = '#f44336';
-            } else if (lives === 2) {
-                livesElement.style.color = '#ff9800';
-            } else {
-                livesElement.style.color = '#4caf50';
+            document.getElementById('buySeedBtn').disabled = gameState.money < 50;
+        }
+
+        // Система сохранения
+        function saveGame() {
+            try {
+                localStorage.setItem('weedTycoon_save', JSON.stringify(gameState));
+            } catch (e) {
+                console.error('Ошибка сохранения:', e);
             }
         }
 
-        function endGame() {
-            gameActive = false;
-            clearInterval(asteroidInterval);
-            clearInterval(autoSaveInterval);
-            startBtn.disabled = false;
-            pauseBtn.disabled = true;
-            
-            // Проверка на новый рекорд
-            const isNewHighScore = score > highScore;
-            if (isNewHighScore) {
-                highScore = score;
-                saveHighScore();
-                highScoreAchieved.style.display = 'block';
-                highScoreElement.classList.add('pulse');
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem('weedTycoon_save');
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    Object.assign(gameState, loaded);
+                    showNotification('🎮 Игра загружена');
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
             }
-            
-            finalScoreElement.textContent = `Очки: ${score}`;
-            gameOverScreen.style.display = 'flex';
-            
-            // Очистить состояние игры после завершения
-            clearGameState();
         }
 
-        // Инициализация при загрузке
-        window.addEventListener('load', function() {
-            loadSavedData();
-            
-            // Предложить продолжить, если есть сохранение
-            setTimeout(continueGame, 1000);
-            
-            // Сохранить при закрытии/обновлении страницы
-            window.addEventListener('beforeunload', saveGameState);
-            window.addEventListener('pagehide', saveGameState);
-        });
-
-        // Запреты масштабирования и прокрутки
-        document.addEventListener('dblclick', (e) => e.preventDefault());
-        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-        window.addEventListener('scroll', () => window.scrollTo(0, 0));
+        // Запуск игры при загрузке
+        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>

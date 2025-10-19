@@ -1,12 +1,12 @@
 {
-  "name": "Простой счётчик",
-  "short_name": "Счётчик",
-  "description": "Простое приложение-счётчик",
+  "name": "Space Defender",
+  "short_name": "SpaceDefender",
+  "description": "Защитите планету от астероидов!",
   "start_url": "/sim/",
   "scope": "/sim/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#667eea",
+  "background_color": "#000000",
+  "theme_color": "#4fc3f7",
   "orientation": "portrait",
   "icons": [
     {

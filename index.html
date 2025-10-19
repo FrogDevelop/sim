@@ -7,10 +7,7 @@
     <!-- iOS мета-теги для полноэкранного режима -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Простой счётчик">
-    
-    <!-- Запрет масштабирования -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-title" content="Space Defender">
     
     <!-- Манифест с правильным путем -->
     <link rel="manifest" href="/sim/manifest.json">
@@ -18,10 +15,7 @@
     <!-- Иконки с правильным путем -->
     <link rel="apple-touch-icon" href="/sim/icon.png">
     
-    <!-- Загрузочный экран -->
-    <link rel="apple-touch-startup-image" href="/sim/icon.png">
-    
-    <title>Простой счётчик</title>
+    <title>Space Defender</title>
     
     <style>
         * {
@@ -36,187 +30,615 @@
             height: 100%;
             overflow: hidden;
             position: fixed;
+            background: #000;
         }
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(180deg, #0c1445 0%, #000000 100%);
+            color: white;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: space-between;
             padding: 20px;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
-            -webkit-overflow-scrolling: touch;
             overflow: hidden;
             touch-action: none;
         }
-        
-        .container {
+
+        .game-header {
             text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            max-width: 300px;
-            width: 100%;
-            /* Запрет выделения текста */
-            -webkit-user-select: none;
-            user-select: none;
+            z-index: 10;
         }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        
-        .counter {
-            font-size: 72px;
+
+        .game-title {
+            font-size: 28px;
             font-weight: bold;
-            color: #667eea;
-            margin: 30px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.15s ease;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px #4fc3f7;
+            margin-bottom: 10px;
         }
-        
-        .buttons {
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .high-score {
+            color: #ffeb3b !important;
+            text-shadow: 0 0 5px #ffeb3b;
+        }
+
+        .game-area {
+            flex: 1;
+            position: relative;
+            margin: 20px 0;
+            border: 2px solid #4fc3f7;
+            border-radius: 15px;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a237e 0%, #000000 70%);
+        }
+
+        .planet {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #4caf50, #1b5e20);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #4caf50;
+        }
+
+        .asteroid {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 30% 30%, #795548, #3e2723);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .asteroid:active {
+            transform: scale(1.2);
+        }
+
+        .explosion {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff9800, #ff5722);
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .controls {
             display: flex;
             gap: 15px;
             justify-content: center;
+            z-index: 10;
         }
-        
+
         button {
             padding: 15px 25px;
             font-size: 18px;
             border: none;
-            border-radius: 50px;
+            border-radius: 25px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
-            flex: 1;
-            min-width: 120px;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        .increment {
-            background: #4CAF50;
+            background: linear-gradient(45deg, #4fc3f7, #01579b);
             color: white;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
         }
-        
-        .decrement {
-            background: #f44336;
-            color: white;
-        }
-        
+
         button:active {
             transform: scale(0.95);
         }
-        
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .secondary-btn {
+            background: linear-gradient(45deg, #ff9800, #e65100);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .game-over h2 {
+            font-size: 36px;
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 24px;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+
+        .high-score-achieved {
+            color: #ffeb3b;
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ffeb3b;
+            display: none;
+        }
+
         .instructions {
-            margin-top: 30px;
-            color: #666;
+            text-align: center;
+            color: #ccc;
             font-size: 14px;
-            line-height: 1.4;
+            margin-top: 10px;
         }
-        
-        .url-info {
-            margin-top: 15px;
+
+        .save-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
             font-size: 12px;
-            color: #888;
-            word-break: break-all;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 50;
         }
-        
-        /* Запрет масштабирования жестами */
-        .prevent-zoom {
-            touch-action: pan-x pan-y;
-            -webkit-user-drag: none;
+
+        /* Анимации */
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(-10px) rotate(0deg); }
+            50% { transform: translateY(10px) rotate(180deg); }
+            100% { transform: translateY(-10px) rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
         }
     </style>
 </head>
-<body class="prevent-zoom">
-    <div class="container">
-        <h1>🔢 Простой счётчик</h1>
-        <div class="counter" id="counter">0</div>
-        <div class="buttons">
-            <button class="decrement" onclick="changeCounter(-1)">-1</button>
-            <button class="increment" onclick="changeCounter(1)">+1</button>
+<body>
+    <div class="save-indicator" id="saveIndicator">Сохранено</div>
+
+    <div class="game-header">
+        <div class="game-title">🚀 SPACE DEFENDER</div>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">ОЧКИ</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="lives">3</div>
+                <div class="stat-label">ЖИЗНИ</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">УРОВЕНЬ</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value high-score" id="highScore">0</div>
+                <div class="stat-label">РЕКОРД</div>
+            </div>
         </div>
-        <div class="instructions">
-            💡 Добавьте на главный экран для полноэкранного режима
-        </div>
-        <div class="url-info" id="urlInfo"></div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+        <div class="planet floating"></div>
+        <!-- Астероиды будут добавляться здесь -->
+    </div>
+
+    <div class="controls">
+        <button onclick="startGame()" id="startBtn">СТАРТ</button>
+        <button onclick="pauseGame()" id="pauseBtn" disabled>ПАУЗА</button>
+        <button onclick="resetProgress()" class="secondary-btn">СБРОС</button>
+    </div>
+
+    <div class="instructions">
+        💥 Нажимайте на астероиды, чтобы защитить планету!
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>💀 GAME OVER</h2>
+        <div class="final-score" id="finalScore">Очки: 0</div>
+        <div class="high-score-achieved" id="highScoreAchieved">🎉 НОВЫЙ РЕКОРД!</div>
+        <button onclick="startGame()">ИГРАТЬ СНОВА</button>
     </div>
 
     <script>
-        let count = 0;
-        const counterElement = document.getElementById('counter');
-        const urlInfoElement = document.getElementById('urlInfo');
-        
-        // Показываем текущий URL для отладки
-        urlInfoElement.textContent = window.location.href;
-        
-        function changeCounter(value) {
-            count += value;
-            counterElement.textContent = count;
-            
-            // Анимация
-            counterElement.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                counterElement.style.transform = 'scale(1)';
-            }, 150);
-        }
-        
-        // Запрет масштабирования жестом двойного тапа
-        document.addEventListener('dblclick', function(e) {
-            e.preventDefault();
-        }, { passive: false });
-        
-        // Запрет контекстного меню
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-        
-        // Запрет масштабирования жестами
-        document.addEventListener('gesturestart', function(e) {
-            e.preventDefault();
-        });
-        
-        document.addEventListener('gesturechange', function(e) {
-            e.preventDefault();
-        });
-        
-        document.addEventListener('gestureend', function(e) {
-            e.preventDefault();
-        });
-        
-        // Обработка касаний для лучшей работы на мобильных
-        document.addEventListener('touchstart', function() {}, {passive: true});
-        
-        // Запрет прокрутки
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
+        // Игровые переменные
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let gameSpeed = 1500;
+        let gameActive = false;
+        let asteroidInterval;
+        let asteroids = [];
+        let highScore = 0;
+        let gameState = {};
+        let autoSaveInterval;
+
+        // Элементы DOM
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const levelElement = document.getElementById('level');
+        const highScoreElement = document.getElementById('highScore');
+        const gameArea = document.getElementById('gameArea');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const gameOverScreen = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+        const highScoreAchieved = document.getElementById('highScoreAchieved');
+        const saveIndicator = document.getElementById('saveIndicator');
+
+        // Система сохранения
+        const STORAGE_KEYS = {
+            HIGH_SCORE: 'spaceDefender_highScore',
+            GAME_STATE: 'spaceDefender_gameState',
+            SETTINGS: 'spaceDefender_settings'
+        };
+
+        // Загрузка сохраненных данных при запуске
+        function loadSavedData() {
+            try {
+                // Загрузка рекорда
+                const savedHighScore = localStorage.getItem(STORAGE_KEYS.HIGH_SCORE);
+                if (savedHighScore) {
+                    highScore = parseInt(savedHighScore);
+                    highScoreElement.textContent = highScore;
+                }
+
+                // Загрузка состояния игры (для продолжения)
+                const savedGameState = localStorage.getItem(STORAGE_KEYS.GAME_STATE);
+                if (savedGameState) {
+                    gameState = JSON.parse(savedGameState);
+                    console.log('Загружено сохраненное состояние:', gameState);
+                }
+
+                showSaveIndicator('Данные загружены');
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
             }
-        }, { passive: false });
-        
-        // Проверяем, правильно ли мы загружены
-        if (!window.location.href.includes('/sim/')) {
-            console.warn('Возможно неправильный URL для PWA');
         }
-        
-        // Дополнительная защита от прокрутки
-        window.addEventListener('scroll', function() {
-            window.scrollTo(0, 0);
+
+        // Сохранение рекорда
+        function saveHighScore() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.HIGH_SCORE, highScore.toString());
+            } catch (error) {
+                console.error('Ошибка сохранения рекорда:', error);
+            }
+        }
+
+        // Авто-сохранение состояния игры
+        function saveGameState() {
+            if (!gameActive) return;
+
+            try {
+                const stateToSave = {
+                    score: score,
+                    lives: lives,
+                    level: level,
+                    gameSpeed: gameSpeed,
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem(STORAGE_KEYS.GAME_STATE, JSON.stringify(stateToSave));
+                showSaveIndicator('Игра сохранена');
+            } catch (error) {
+                console.error('Ошибка сохранения игры:', error);
+            }
+        }
+
+        // Продолжение сохраненной игры
+        function continueGame() {
+            if (gameState && gameState.score > 0) {
+                if (confirm('Найдено сохранение игры. Продолжить?')) {
+                    score = gameState.score;
+                    lives = gameState.lives;
+                    level = gameState.level;
+                    gameSpeed = gameState.gameSpeed;
+                    
+                    updateUI();
+                    startGame();
+                }
+            }
+        }
+
+        // Очистка сохраненного состояния
+        function clearGameState() {
+            try {
+                localStorage.removeItem(STORAGE_KEYS.GAME_STATE);
+                gameState = {};
+            } catch (error) {
+                console.error('Ошибка очистки состояния:', error);
+            }
+        }
+
+        // Показать индикатор сохранения
+        function showSaveIndicator(message) {
+            saveIndicator.textContent = message;
+            saveIndicator.style.opacity = '1';
+            setTimeout(() => {
+                saveIndicator.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Сброс всего прогресса
+        function resetProgress() {
+            if (confirm('Вы уверены? Это сбросит весь ваш прогресс и рекорды!')) {
+                try {
+                    localStorage.removeItem(STORAGE_KEYS.HIGH_SCORE);
+                    localStorage.removeItem(STORAGE_KEYS.GAME_STATE);
+                    highScore = 0;
+                    gameState = {};
+                    highScoreElement.textContent = '0';
+                    showSaveIndicator('Прогресс сброшен');
+                    
+                    if (!gameActive) {
+                        resetGame();
+                    }
+                } catch (error) {
+                    console.error('Ошибка сброса прогресса:', error);
+                }
+            }
+        }
+
+        function startGame() {
+            resetGame();
+            gameActive = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            gameOverScreen.style.display = 'none';
+            highScoreAchieved.style.display = 'none';
+            
+            // Запуск генерации астероидов
+            asteroidInterval = setInterval(createAsteroid, gameSpeed);
+            
+            // Запуск авто-сохранения
+            autoSaveInterval = setInterval(saveGameState, 10000); // Сохранять каждые 10 секунд
+            
+            showSaveIndicator('Игра начата!');
+        }
+
+        function pauseGame() {
+            gameActive = !gameActive;
+            pauseBtn.textContent = gameActive ? 'ПАУЗА' : 'ПРОДОЛЖИТЬ';
+            
+            if (!gameActive) {
+                clearInterval(asteroidInterval);
+                saveGameState(); // Сохранить при паузе
+            } else {
+                asteroidInterval = setInterval(createAsteroid, gameSpeed);
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            level = 1;
+            gameSpeed = 1500;
+            updateUI();
+            
+            // Удалить все астероиды
+            asteroids.forEach(asteroid => asteroid.remove());
+            asteroids = [];
+            
+            clearInterval(asteroidInterval);
+            clearInterval(autoSaveInterval);
+        }
+
+        function createAsteroid() {
+            if (!gameActive) return;
+
+            const asteroid = document.createElement('div');
+            asteroid.className = 'asteroid';
+            
+            const maxX = gameArea.offsetWidth - 30;
+            const x = Math.random() * maxX;
+            
+            asteroid.style.left = x + 'px';
+            asteroid.style.top = '-30px';
+            
+            const size = 20 + Math.random() * 30;
+            asteroid.style.width = size + 'px';
+            asteroid.style.height = size + 'px';
+            
+            asteroid.addEventListener('click', destroyAsteroid);
+            
+            gameArea.appendChild(asteroid);
+            asteroids.push(asteroid);
+            
+            let position = -30;
+            const fallInterval = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(fallInterval);
+                    return;
+                }
+                
+                position += 2 + level * 0.5;
+                asteroid.style.top = position + 'px';
+                
+                if (position > gameArea.offsetHeight - 110) {
+                    clearInterval(fallInterval);
+                    asteroid.remove();
+                    asteroids = asteroids.filter(a => a !== asteroid);
+                    loseLife();
+                }
+            }, 20);
+        }
+
+        function destroyAsteroid(event) {
+            if (!gameActive) return;
+            
+            const asteroid = event.target;
+            const rect = asteroid.getBoundingClientRect();
+            
+            createExplosion(rect.left + rect.width/2, rect.top + rect.height/2);
+            
+            asteroid.remove();
+            asteroids = asteroids.filter(a => a !== asteroid);
+            
+            score += 10 * level;
+            updateUI();
+            
+            // Авто-сохранение при значительном изменении счета
+            if (score % 50 === 0) {
+                saveGameState();
+            }
+            
+            if (score >= level * 100) {
+                levelUp();
+            }
+        }
+
+        function createExplosion(x, y) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (x - 25) + 'px';
+            explosion.style.top = (y - 25) + 'px';
+            
+            gameArea.appendChild(explosion);
+            
+            explosion.style.animation = 'explode 0.5s forwards';
+            setTimeout(() => explosion.remove(), 500);
+        }
+
+        function loseLife() {
+            lives--;
+            updateUI();
+            
+            // Сохранить при потере жизни
+            saveGameState();
+            
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+
+        function levelUp() {
+            level++;
+            gameSpeed = Math.max(300, gameSpeed - 100);
+            updateUI();
+            
+            levelElement.classList.add('pulse');
+            setTimeout(() => levelElement.classList.remove('pulse'), 500);
+            
+            // Сохранить при переходе на новый уровень
+            saveGameState();
+        }
+
+        function updateUI() {
+            scoreElement.textContent = score;
+            livesElement.textContent = lives;
+            levelElement.textContent = level;
+            highScoreElement.textContent = highScore;
+            
+            if (lives === 1) {
+                livesElement.style.color = '#f44336';
+            } else if (lives === 2) {
+                livesElement.style.color = '#ff9800';
+            } else {
+                livesElement.style.color = '#4caf50';
+            }
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(asteroidInterval);
+            clearInterval(autoSaveInterval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            
+            // Проверка на новый рекорд
+            const isNewHighScore = score > highScore;
+            if (isNewHighScore) {
+                highScore = score;
+                saveHighScore();
+                highScoreAchieved.style.display = 'block';
+                highScoreElement.classList.add('pulse');
+            }
+            
+            finalScoreElement.textContent = `Очки: ${score}`;
+            gameOverScreen.style.display = 'flex';
+            
+            // Очистить состояние игры после завершения
+            clearGameState();
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('load', function() {
+            loadSavedData();
+            
+            // Предложить продолжить, если есть сохранение
+            setTimeout(continueGame, 1000);
+            
+            // Сохранить при закрытии/обновлении страницы
+            window.addEventListener('beforeunload', saveGameState);
+            window.addEventListener('pagehide', saveGameState);
         });
-        
-        // Блокировка любых попыток скролла
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
+
+        // Запреты масштабирования и прокрутки
+        document.addEventListener('dblclick', (e) => e.preventDefault());
+        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        window.addEventListener('scroll', () => window.scrollTo(0, 0));
     </script>
 </body>
 </html>

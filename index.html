@@ -2,12 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     
     <!-- iOS мета-теги для полноэкранного режима -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Простой счётчик">
+    
+    <!-- Запрет масштабирования -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- Манифест с правильным путем -->
     <link rel="manifest" href="/sim/manifest.json">
@@ -25,6 +28,14 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
         }
         
         body {
@@ -39,6 +50,9 @@
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
+            -webkit-overflow-scrolling: touch;
+            overflow: hidden;
+            touch-action: none;
         }
         
         .container {
@@ -49,6 +63,9 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             max-width: 300px;
             width: 100%;
+            /* Запрет выделения текста */
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         h1 {
@@ -82,6 +99,8 @@
             font-weight: 600;
             flex: 1;
             min-width: 120px;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         .increment {
@@ -111,9 +130,15 @@
             color: #888;
             word-break: break-all;
         }
+        
+        /* Запрет масштабирования жестами */
+        .prevent-zoom {
+            touch-action: pan-x pan-y;
+            -webkit-user-drag: none;
+        }
     </style>
 </head>
-<body>
+<body class="prevent-zoom">
     <div class="container">
         <h1>🔢 Простой счётчик</h1>
         <div class="counter" id="counter">0</div>
@@ -146,13 +171,52 @@
             }, 150);
         }
         
+        // Запрет масштабирования жестом двойного тапа
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Запрет контекстного меню
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Запрет масштабирования жестами
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+        });
+        
+        document.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
+        
         // Обработка касаний для лучшей работы на мобильных
         document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Запрет прокрутки
+        document.addEventListener('touchmove', function(e) {
+            if (e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
         
         // Проверяем, правильно ли мы загружены
         if (!window.location.href.includes('/sim/')) {
             console.warn('Возможно неправильный URL для PWA');
         }
+        
+        // Дополнительная защита от прокрутки
+        window.addEventListener('scroll', function() {
+            window.scrollTo(0, 0);
+        });
+        
+        // Блокировка любых попыток скролла
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
     </script>
 </body>
 </html>
